@@ -160,7 +160,7 @@ func main() {
 
 	go func() {
 		for i := 0; i < len(seeds); i += 2 {
-			for j := seeds[i]; j < seeds[i+1]; j++ {
+			for j := seeds[i]; j < seeds[i]+seeds[i+1]; j++ {
 				inputs <- j
 			}
 		}
@@ -177,12 +177,10 @@ func main() {
 	fmt.Println(min)
 }
 
-func findEnd(start int, mappings []*Mapping) int {
-	var seed = start
-
+func findEnd(seed int, mappings []*Mapping) int {
 	for _, mapping := range mappings {
 		var sl []int
-		for _, startLen := range mapping.StartLen {
+		for _, startLen := range mapping.SourceRange {
 			if seed >= startLen[0] && seed < startLen[0]+startLen[1] {
 				sl = startLen
 				break
@@ -203,7 +201,7 @@ func findEnd(start int, mappings []*Mapping) int {
 
 type Mapping struct {
 	SourceToDest map[int]int
-	StartLen     [][]int
+	SourceRange  [][]int
 }
 
 func parseSeeds(s string) []int {
@@ -243,7 +241,7 @@ func parseMappings(lines []string) []*Mapping {
 		}
 
 		mapping.SourceToDest[ns[1]] = ns[0]
-		mapping.StartLen = append(mapping.StartLen, []int{ns[1], ns[2]})
+		mapping.SourceRange = append(mapping.SourceRange, []int{ns[1], ns[2]})
 	}
 
 	result = append(result, mapping)
