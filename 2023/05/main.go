@@ -95,6 +95,158 @@
 
 package main
 
-func main() {
+import (
+	"fmt"
+	"log"
+	"runtime"
+	"strconv"
+	"strings"
+	"sync"
 
+	"github.com/cnnrznn/advent-of-code/util"
+)
+
+/* part 1
+func main() {
+	lines, _ := util.ReadLines("./input.txt")
+	seeds := parseSeeds(lines[0])
+	mappings := parseMappings(lines[1:])
+
+	min := -1
+
+	for _, seed := range seeds {
+		end := findEnd(seed, mappings)
+		if min < 0 || end < min {
+			min = end
+		}
+	}
+
+	fmt.Println(min)
+}*/
+
+var (
+	outputs  chan int
+	inputs   chan int
+	mappings []*Mapping
+)
+
+func ProcessInputs(inputs, outputs chan int, wg *sync.WaitGroup) {
+	for input := range inputs {
+		outputs <- findEnd(input, mappings)
+	}
+	wg.Done()
+}
+
+func main() {
+	lines, _ := util.ReadLines("./input.txt")
+	seeds := parseSeeds(lines[0])
+	mappings = parseMappings(lines[1:])
+	outputs = make(chan int, 1024)
+	inputs = make(chan int, 1024)
+
+	min := -1
+
+	wg := sync.WaitGroup{}
+
+	for i := 0; i < runtime.NumCPU(); i++ {
+		go ProcessInputs(inputs, outputs, &wg)
+		wg.Add(1)
+	}
+
+	go func() {
+		wg.Wait()
+		close(outputs)
+	}()
+
+	go func() {
+		for i := 0; i < len(seeds); i += 2 {
+			for j := seeds[i]; j < seeds[i+1]; j++ {
+				inputs <- j
+			}
+		}
+		close(inputs)
+	}()
+
+	for output := range outputs {
+		if min < 0 || (output < min) {
+			min = output
+			log.Printf("min: %v\n", min)
+		}
+	}
+
+	fmt.Println(min)
+}
+
+func findEnd(start int, mappings []*Mapping) int {
+	var seed = start
+
+	for _, mapping := range mappings {
+		var sl []int
+		for _, startLen := range mapping.StartLen {
+			if seed >= startLen[0] && seed < startLen[0]+startLen[1] {
+				sl = startLen
+				break
+			}
+		}
+
+		var dest int = seed
+
+		if sl != nil {
+			dest = mapping.SourceToDest[sl[0]] + (seed - sl[0])
+		}
+
+		seed = dest
+	}
+
+	return seed
+}
+
+type Mapping struct {
+	SourceToDest map[int]int
+	StartLen     [][]int
+}
+
+func parseSeeds(s string) []int {
+	result := []int{}
+
+	s = strings.Split(s, ":")[1]
+	seeds := strings.Fields(s)
+
+	for _, seed := range seeds {
+		x, _ := strconv.Atoi(seed)
+		result = append(result, x)
+	}
+
+	return result
+}
+
+func parseMappings(lines []string) []*Mapping {
+	result := []*Mapping{}
+	var mapping *Mapping
+
+	for _, line := range lines {
+		if strings.Contains(line, ":") {
+			if mapping != nil {
+				result = append(result, mapping)
+			}
+			mapping = &Mapping{
+				SourceToDest: make(map[int]int),
+			}
+			continue
+		}
+
+		fields := strings.Fields(line)
+		ns := []int{}
+		for _, f := range fields {
+			n, _ := strconv.Atoi(f)
+			ns = append(ns, n)
+		}
+
+		mapping.SourceToDest[ns[1]] = ns[0]
+		mapping.StartLen = append(mapping.StartLen, []int{ns[1], ns[2]})
+	}
+
+	result = append(result, mapping)
+
+	return result
 }
