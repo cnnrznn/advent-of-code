@@ -178,6 +178,11 @@ func main() {
 }
 
 func findEnd(seed int, mappings []*Mapping) int {
+	// Faster approach:
+	// seed is a range of seeds
+	// for each range in the mapping
+	//   if the range overlaps with seeds, process that part of the range (recurse mapping to destination range), left of the overlap (same mapping), and right of the overlap (same mapping)
+	//   return min of all three
 	for _, mapping := range mappings {
 		var sl []int
 		for _, startLen := range mapping.SourceRange {
