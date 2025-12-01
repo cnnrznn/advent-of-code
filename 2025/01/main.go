@@ -18,7 +18,6 @@ func main() {
 		panic(err)
 	}
 
-	// curr := puzzleMidpoint
 	var (
 		spinner = NewSpinner(puzzleMidpoint, puzzleRange)
 		result  int
@@ -38,16 +37,62 @@ func main() {
 			panic(err)
 		}
 
-		spinner.Spin(dir * x)
-
-		if spinner.Position() == 0 {
-			result++
-		}
-
-		fmt.Println(originalLine, x, dir, spinner.Position())
+		result += spinner.Spin(dir * x)
+		fmt.Println(originalLine, result)
 	}
 
 	fmt.Println(result)
+}
+
+type Spinner struct {
+	curr int
+	size int
+	max  int
+}
+
+func NewSpinner(start, size int) *Spinner {
+	return &Spinner{
+		curr: start,
+		size: size,
+		max:  size - 1,
+	}
+}
+
+// Spin moves the spinner by delta. It returns the number
+// of times 0 was clicked.
+func (s *Spinner) Spin(delta int) int {
+	// STEPS TO SOLVE
+	// 1. Compute number of times the ticker will hit zero
+	// 2. Compute new position of the spinner
+	// 3. profit.
+
+	var (
+		clicks int
+	)
+
+	for ; delta > 0; delta-- {
+		s.curr++
+		if s.curr > s.max {
+			s.curr = 0
+			clicks++
+		}
+	}
+
+	for ; delta < 0; delta++ {
+		s.curr--
+		if s.curr < 0 {
+			s.curr += s.size
+		}
+		if s.curr == 0 {
+			clicks++
+		}
+	}
+
+	return clicks
+}
+
+func (s *Spinner) Position() int {
+	return s.curr
 }
 
 type ProcessorFunc[I, O any] func(I) (O, error)
@@ -68,35 +113,4 @@ func (p *Processor[I, O]) Exec(i I) O {
 		panic(err)
 	}
 	return o
-}
-
-type Spinner struct {
-	curr int
-	size int
-}
-
-func NewSpinner(start, size int) *Spinner {
-	return &Spinner{
-		curr: start,
-		size: size,
-	}
-}
-
-func (s *Spinner) Spin(delta int) {
-	new := s.curr + delta
-
-	// correct large deltas
-	for new > s.size-1 {
-		new = new - s.size
-	}
-
-	// correct large deltas
-	for new < 0 {
-		new = new + s.size
-	}
-	s.curr = new
-}
-
-func (s *Spinner) Position() int {
-	return s.curr
 }
