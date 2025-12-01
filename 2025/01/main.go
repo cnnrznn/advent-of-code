@@ -61,11 +61,6 @@ func NewSpinner(start, size int) *Spinner {
 // Spin moves the spinner by delta. It returns the number
 // of times 0 was clicked.
 func (s *Spinner) Spin(delta int) int {
-	// STEPS TO SOLVE
-	// 1. Compute number of times the ticker will hit zero
-	// 2. Compute new position of the spinner
-	// 3. profit.
-
 	var (
 		clicks int
 	)
