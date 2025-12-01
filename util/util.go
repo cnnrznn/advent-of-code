@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bufio"
 	"bytes"
 	"os"
 	"strings"
@@ -23,6 +24,31 @@ func ReadLines(fn string) ([]string, error) {
 		}
 
 		lines = append(lines, string(bs))
+	}
+
+	return lines, nil
+}
+
+func ReadStdio() ([]string, error) {
+	var reader *bufio.Reader
+
+	args := os.Args[1:]
+	if len(args) > 0 {
+		f, err := os.Open(args[0])
+		if err != nil {
+			return nil, err
+		}
+		reader = bufio.NewReader(f)
+	} else {
+		reader = bufio.NewReader(os.Stdin)
+	}
+
+	var lines []string
+
+	scanner := bufio.NewScanner(reader)
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
 	}
 
 	return lines, nil
