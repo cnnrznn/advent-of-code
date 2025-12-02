@@ -24,7 +24,6 @@ func main() {
 	)
 
 	for _, line := range lines {
-		originalLine := line
 		dir := 1
 		if line[0] == 'L' {
 			dir = -1
@@ -37,8 +36,7 @@ func main() {
 			panic(err)
 		}
 
-		result += spinner.Spin(dir * x)
-		fmt.Println(originalLine, result)
+		result += spinner.SpinV2(dir * x)
 	}
 
 	fmt.Println(result)
@@ -86,6 +84,38 @@ func (s *Spinner) Spin(delta int) int {
 	return clicks
 }
 
+func (s *Spinner) SpinV2(delta int) int {
+	var (
+		clicks int
+	)
+
+	// remove the size of the spinner from the spin count
+	revolutions := delta / s.size
+	clicks += abs(revolutions)
+
+	remainder := delta % s.size
+
+	// move the spinner the last bit
+	if remainder > 0 {
+		s.curr += remainder
+		if s.curr > s.max {
+			clicks++
+			s.curr -= s.size
+		}
+	} else if remainder < 0 {
+		start := s.curr
+		s.curr += remainder
+		if s.curr <= 0 && start > 0 {
+			clicks++
+		}
+		if s.curr < 0 {
+			s.curr += s.size
+		}
+	}
+
+	return clicks
+}
+
 func (s *Spinner) Position() int {
 	return s.curr
 }
@@ -108,4 +138,11 @@ func (p *Processor[I, O]) Exec(i I) O {
 		panic(err)
 	}
 	return o
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -1 * x
+	}
+	return x
 }
