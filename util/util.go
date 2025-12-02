@@ -29,7 +29,7 @@ func ReadLines(fn string) ([]string, error) {
 	return lines, nil
 }
 
-func ReadStdio() ([]string, error) {
+func ReadInput() ([]string, error) {
 	var reader *bufio.Reader
 
 	args := os.Args[1:]

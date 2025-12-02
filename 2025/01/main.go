@@ -13,7 +13,7 @@ const (
 )
 
 func main() {
-	lines, err := util.ReadStdio()
+	lines, err := util.ReadInput()
 	if err != nil {
 		panic(err)
 	}
