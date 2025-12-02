@@ -38,7 +38,7 @@ func processLine(l string) int {
 func countInvalidIDs(first, last int) int {
 	var result int
 	for i := first; i <= last; i++ {
-		if isInvalidID(i) {
+		if isInvalidIDpart2(i) {
 			result += i
 		}
 	}
@@ -57,8 +57,42 @@ func isInvalidID(x int) bool {
 	return s[:mid] == s[mid:]
 }
 
-// func isInvalidIDpart2(x int) bool {
-// 	s := strconv.Itoa(x)
+func isInvalidIDpart2(x int) bool {
+	s := strconv.Itoa(x)
+	
+	// start with a window
+	for w := 1; w <= len(s); w++ {
+		substr := s[:w]
+		if isRepeated(s[w:], substr) {
+			return true
+		}
+	}
 
-// 	for
-// }
+	return false
+}
+
+func isRepeated(s, sub string) bool {
+	// see if that window is repeated for the rest of the string
+	var (
+		isRepeated bool
+		size = len(sub)
+	)
+
+	// sub cannot be repeated in s if it is not divisible
+	if len(s) % len(sub) != 0 {
+		return false
+	}
+
+	// check each window for equality
+	for len(s) >= len(sub) {
+		if s[:size] == sub {
+			isRepeated = true
+			s = s[size:]
+		} else {
+			isRepeated = false
+			break
+		}
+	}
+
+	return isRepeated
+}
