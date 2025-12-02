@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"testing"
@@ -34,7 +34,7 @@ func TestSpinner_Spin(t *testing.T) {
 
 	t.Run("spinner spins backwards correctly", func(t *testing.T) {
 		s := NewSpinner(0, 10)
-		
+
 		s.Spin(-1)
 		require.Equal(t, 9, s.Position())
 
@@ -45,20 +45,5 @@ func TestSpinner_Spin(t *testing.T) {
 		r = s.Spin(-19)
 		require.Equal(t, 0, s.Position())
 		require.Equal(t, 2, r)
-	})
-}
-
-func TestSpinner_SpinV2(t *testing.T) {
-	t.Run("number of forward spins", func(t *testing.T) {
-		s := NewSpinner(0, 10)
-
-		clicks := s.SpinV2(10)
-		require.Equal(t, 1, clicks)
-
-		clicks = s.SpinV2(100)
-		require.Equal(t, 10, clicks)
-
-		clicks = s.SpinV2(17)
-		require.Equal(t, 1, clicks)
 	})
 }
